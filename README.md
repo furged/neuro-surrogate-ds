@@ -1,0 +1,66 @@
+# [Prototype] Neural Surrogate Modeling for the 2D Heat Equation
+
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red?logo=pytorch)](https://pytorch.org/)
+[![Status](https://img.shields.io/badge/Status-Prototype-yellow)](https://github.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+> **Warning:** This is an active research prototype. The codebase is intended for experimentation and benchmarking, not for production deployment.
+
+---
+
+## Overview
+
+Numerical solvers for Partial Differential Equations (PDEs) remain computationally expensive for tasks requiring thousands of forward passes (e.g., optimization, inverse design). 
+
+This prototype explores replacing the numerical solver for the **2D Heat Equation** with trained neural surrogates. The objective is to benchmark speed and accuracy trade-offs between standard architectures and modern neural operators.
+
+---
+
+## Methodology
+
+### 1. Data Generation
+A batched, finite-difference numerical solver generates ground-truth data:
+
+`∂T/∂t = α∇²T`
+
+- **Input:** Initial temperature distribution on a 64×64 grid (random heat sources).
+- **Output:** Temperature distribution at the next time step (t+1).
+- **Dataset Size:** 10 simulations × 20 time steps (200 training samples).
+
+### 2. Baseline Model: CNN
+A standard Encoder-Decoder Convolutional Neural Network acts as the baseline surrogate.
+
+- **Strength:** Effective for single-step predictions.
+- **Limitation:** Error accumulation during long-term autoregressive rollouts, resulting in spatial blurring and checkerboard artifacts.
+
+### 3. State-of-the-Art: Fourier Neural Operator (FNO)
+The FNO learns mappings between infinite-dimensional function spaces using integral operators in the Fourier domain.
+
+- **Strength:** Captures global dependencies, leading to stable long-term rollouts.
+
+---
+
+## Results (Prototype Phase)
+
+### Long-Term Rollout (t=0 to t=19)
+The figure below compares ground truth against the FNO prediction after 19 autoregressive steps:
+
+![FNO Rollout Comparison](results/fno_rollout_result.png)
+
+The FNO maintains spatial coherence and accurately reproduces diffusion behavior. The CNN baseline degrades into artifacts (comparison images available in the `/results` directory).
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Python 3.8+
+- PyTorch
+- Matplotlib
+- neuraloperator
+
+### Installation
+
+```bash
+pip install torch matplotlib neuraloperator
