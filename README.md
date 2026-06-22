@@ -41,14 +41,26 @@ The FNO learns mappings between infinite-dimensional function spaces using integ
 
 ---
 
-## Results (Prototype Phase)
+## Results
 
-### Long-Term Rollout (t=0 to t=19)
+### 1. Long-Term Rollout (t=0 to t=19)
 The figure below compares ground truth against the FNO prediction after 19 autoregressive steps:
 
 ![FNO Rollout Comparison](results/fno_rollout_result.png)
 
-The FNO maintains spatial coherence and accurately reproduces diffusion behavior. The CNN baseline degrades into artifacts (comparison images available in the `/results` directory).
+### 2. Error Accumulation Over Time
+The graph below tracks the Mean Squared Error (MSE) at each time step during a 20-step rollout. 
+
+![Error Accumulation](results/error_accumulation.png)
+
+*Observation:* The CNN error grows significantly as the rollout progresses, while the FNO maintains a low, stable error rate.
+
+### 3. Inference Speed Benchmark
+The bar chart below compares the time required to run 100 rollouts (20 steps each) for the Physics Solver, the CNN, and the FNO on a standard CPU.
+
+![Speed Benchmark](results/speed_benchmark.png)
+
+*Observation:* The FNO is orders of magnitude faster than the traditional numerical solver, demonstrating the practical value of neural surrogates.
 
 ---
 
