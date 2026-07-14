@@ -89,7 +89,6 @@ The bar chart below compares the time required to run 100 rollouts (20 steps eac
 ```bash
 pip install torch matplotlib neuraloperator
 
-```markdown
 ```
 
 ### Running the Models
@@ -155,4 +154,3 @@ pip install torch matplotlib neuraloperator
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-```
