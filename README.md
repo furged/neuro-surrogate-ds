@@ -39,6 +39,18 @@ The FNO learns mappings between infinite-dimensional function spaces using integ
 
 - **Strength:** Captures global dependencies, leading to stable long-term rollouts.
 
+### 4. Large-Scale HPC Benchmark (Pending)
+
+**Status:** ⏳ *Scheduled for HPC cluster run (available in ~3 weeks).*
+
+This prototype is currently being scaled up to 40,000+ simulations on a university High-Performance Computing (HPC) cluster. The upcoming benchmark will test:
+
+- **Massive Data Scaling:** Training on 40,000 simulations with varying diffusion coefficients.
+- **Long-Term Prediction:** Extending rollout predictions to 100 time steps.
+- **Zero-Shot Resolution Scaling:** Testing the FNO's ability to generalize to 128x128, 256x256, and 512x512 grids *without retraining*.
+
+Results and scaling graphs will be added to the `results/` folder upon completion of the cluster run.
+
 ---
 
 ## Results
