@@ -120,25 +120,6 @@ pip install torch matplotlib neuraloperator
 
 ---
 
-## Project Structure
-
-```text
-.
-├── data_generator_cpu.py     # Batched physics solver
-├── dataset_prep.py           # PyTorch Dataset and DataLoader
-├── train_cnn.py              # CNN training pipeline
-├── train_fno.py              # FNO training pipeline
-├── test_rollout.py           # Autoregressive testing
-├── benchmark.py              # Speed and error benchmarking
-├── results/                  # Output visualizations
-│   ├── fno_rollout_result.png
-│   ├── cnn_rollout_result.png
-│   ├── error_accumulation.png
-│   └── speed_benchmark.png
-└── README.md
-```
-
----
 
 ## Roadmap
 
