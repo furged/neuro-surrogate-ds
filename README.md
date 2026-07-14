@@ -88,3 +88,71 @@ The bar chart below compares the time required to run 100 rollouts (20 steps eac
 
 ```bash
 pip install torch matplotlib neuraloperator
+
+```markdown
+```
+
+### Running the Models
+
+1. Generate simulation data:
+   ```
+   python data_generator_cpu.py
+   ```
+
+2. Train the CNN baseline:
+   ```
+   python train_cnn.py
+   ```
+
+3. Train the FNO model:
+   ```
+   python train_fno.py
+   ```
+
+4. Run the long-term rollout test:
+   ```
+   python test_rollout.py
+   ```
+
+5. Run speed and error benchmarks:
+   ```
+   python benchmark.py
+   ```
+
+---
+
+## Project Structure
+
+```text
+.
+├── data_generator_cpu.py     # Batched physics solver
+├── dataset_prep.py           # PyTorch Dataset and DataLoader
+├── train_cnn.py              # CNN training pipeline
+├── train_fno.py              # FNO training pipeline
+├── test_rollout.py           # Autoregressive testing
+├── benchmark.py              # Speed and error benchmarking
+├── results/                  # Output visualizations
+│   ├── fno_rollout_result.png
+│   ├── cnn_rollout_result.png
+│   ├── error_accumulation.png
+│   └── speed_benchmark.png
+└── README.md
+```
+
+---
+
+## Roadmap
+
+- [x] Prototype CNN and FNO on small dataset (10 simulations, 20 time steps)
+- [x] Benchmark inference speed vs. traditional solver
+- [x] Error accumulation analysis (CNN vs FNO)
+- [ ] HPC run: Scale to 40,000+ simulations
+- [ ] HPC run: Zero-shot resolution scaling (64 → 512)
+- [ ] Update results with scaling graphs and 512x512 prediction demo
+
+---
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+```
