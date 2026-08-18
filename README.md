@@ -4,7 +4,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red?logo=pytorch)](https://pytorch.org/)
 [![Status](https://img.shields.io/badge/Status-Prototype-yellow)](https://github.com/)
 
-> **Warning:** This is an active research prototype. The codebase is intended for experimentation and benchmarking, not for production deployment.
+>  This is an active research prototype. The codebase is intended for experimentation and benchmarking, not for production deployment.
 
 ---
 
@@ -129,8 +129,4 @@ pip install torch matplotlib neuraloperator
 - [ ] HPC run: Zero-shot resolution scaling (64 → 512)
 - [ ] Update results with scaling graphs and 512x512 prediction demo
 
----
 
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
