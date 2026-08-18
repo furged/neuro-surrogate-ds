@@ -1,18 +1,18 @@
 import torch
 import matplotlib.pyplot as plt
 
-# --- SETUP (Automatically uses CPU if no GPU) ---
+# setup
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
-# --- PARAMETERS (Reduced for CPU speed) ---
+# parameters
 grid_size = 64          # 64x64 grid
 num_simulations = 10    # Reduced to 10 for faster CPU runs
 diffusion_coefficient = 0.1  
 dt = 0.1                
 time_steps = 20         # Reduced to 20 time steps
 
-# --- 1. CREATE INITIAL CONDITIONS ---
+# create the initial conditions
 initial_heat = torch.zeros((num_simulations, 1, grid_size, grid_size), device=device)
 
 for i in range(num_simulations):
@@ -21,7 +21,7 @@ for i in range(num_simulations):
         x, y = torch.randint(0, grid_size, (2,)).tolist()
         initial_heat[i, 0, x, y] = 100.0
 
-# --- 2. THE FAST PHYSICS SOLVER (Now runs on CPU) ---
+# run the physics solver
 all_simulations = torch.zeros((num_simulations, time_steps, 1, grid_size, grid_size), device=device)
 all_simulations[:, 0, :, :, :] = initial_heat
 
@@ -36,7 +36,7 @@ for t in range(1, time_steps):
 
 print(f"Dataset generated! Shape: {all_simulations.shape}")
 
-# --- 3. VISUALIZE ---
+# visualize the results
 plt.figure(figsize=(10, 5))
 plt.subplot(1, 2, 1)
 plt.imshow(all_simulations[0, 0, 0].cpu().numpy(), cmap='hot')
@@ -47,4 +47,5 @@ plt.subplot(1, 2, 2)
 plt.imshow(all_simulations[0, -1, 0].cpu().numpy(), cmap='hot')
 plt.title("Heat after 20 steps (t=20)")
 plt.colorbar()
+
 plt.show()
