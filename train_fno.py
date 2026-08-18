@@ -4,9 +4,9 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 import numpy as np
-from neuralop.models import FNO  # <--- The magic library!
+from neuralop.models import FNO  # FNO library
 
-# --- 1. SETUP & DATA GENERATION (Same as before) ---
+# setup and data generation
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
@@ -16,7 +16,7 @@ diffusion_coefficient = 0.1
 dt = 0.1
 time_steps = 20
 
-# Generate data
+# generate the data
 initial_heat = torch.zeros((num_simulations, 1, grid_size, grid_size), device=device)
 for i in range(num_simulations):
     num_spots = torch.randint(1, 4, (1,)).item()
@@ -33,7 +33,7 @@ for t in range(1, time_steps):
     current_state = current_state + dt * (diffusion_coefficient * laplacian)
     all_simulations[:, t, :, :, :] = current_state
 
-# --- 2. DATASET PREP ---
+# prepare the dataset
 class HeatEquationDataset(Dataset):
     def __init__(self, data):
         self.data = data
@@ -51,11 +51,10 @@ class HeatEquationDataset(Dataset):
 
 dataloader = DataLoader(HeatEquationDataset(all_simulations), batch_size=16, shuffle=True)
 
-# --- 3. DEFINE THE FNO MODEL ---
-# An FNO is much more complex, but the library makes it easy!
-# We choose:
-#   n_modes: How many Fourier frequencies to keep (higher = more accurate, slower)
-#   hidden_channels: How many "neurons" in the middle
+# define the FNO model
+# the FNO uses Fourier frequencies to learn the patterns in the data
+# n_modes controls how many frequencies are kept
+# hidden_channels controls the size of the internal representation
 model = FNO(n_modes=(16, 16), 
             hidden_channels=32, 
             in_channels=1, 
@@ -66,7 +65,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 print(f"FNO has {sum(p.numel() for p in model.parameters())} parameters")
 
-# --- 4. TRAINING LOOP ---
+# training loop
 num_epochs = 50
 print("\nStarting FNO Training...")
 for epoch in range(num_epochs):
@@ -86,7 +85,7 @@ for epoch in range(num_epochs):
     if (epoch + 1) % 10 == 0:
         print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {epoch_loss/len(dataloader):.6f}")
 
-# --- 5. FNO ROLLOUT TEST ---
+# test the FNO rollout
 model.eval()
 starting_state = all_simulations[0, 0, :, :, :].unsqueeze(0).to(device)
 ground_truth_steps = all_simulations[0, :, :, :, :].cpu().numpy()
@@ -101,7 +100,7 @@ for t in range(1, time_steps):
 
 predicted_steps = np.array(predicted_steps)
 
-# --- 6. PLOT COMPARISON ---
+# compare the results
 plt.figure(figsize=(15, 4))
 
 plt.subplot(1, 3, 1)
