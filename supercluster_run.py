@@ -11,7 +11,7 @@ import os
 
 #hpc setup
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f"🚀 CONNECTED TO: {torch.cuda.get_device_name(0)}")
+print(f"CONNECTED TO: {torch.cuda.get_device_name(0)}")
 print(f"Total VRAM: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
 
 #suptercomputer params
@@ -72,7 +72,7 @@ model = FNO(n_modes=(24, 24), hidden_channels=128, in_channels=1, out_channels=1
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-print(f"\n🔥 Training FNO on {len(train_data_64)} simulations...")
+print(f"\nTraining FNO on {len(train_data_64)} simulations...")
 print(f"Model params: {sum(p.numel() for p in model.parameters()):,}")
 
 epochs = 30
@@ -91,7 +91,7 @@ for epoch in range(epochs):
     print(f"Epoch {epoch+1}/{epochs} | Avg Loss: {epoch_loss/len(train_loader):.6f}")
 
 #resolution scaling test
-print("\n🧪 Testing FNO on HIGHER RESOLUTIONS (Zero-shot scaling)...")
+print("\nTesting FNO on HIGHER RESOLUTIONS (Zero-shot scaling)...")
 model.eval()
 resolutions = [64, 128, 256, 512]
 res_errors = []
@@ -123,7 +123,7 @@ plt.grid(axis='y', linestyle='--')
 plt.savefig("results/super_resolution_scaling.png")
 
 #speed demo (512x512 in milliseconds)
-print("\n⚡ Running final speed demonstration on 512x512 grid...")
+print("\nRunning final speed demonstration on 512x512 grid...")
 state_512 = generate_batch(1, 512, 0.25)
 start_time = time.time()
 with torch.no_grad():
