@@ -3,7 +3,7 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 import numpy as np
 
-# --- 1. COPY THE MODEL DEFINITION ---
+# model definition
 class HeatCNN(nn.Module):
     def __init__(self):
         super(HeatCNN, self).__init__()
@@ -23,11 +23,11 @@ class HeatCNN(nn.Module):
         x = self.decoder(x)
         return x
 
-# --- 2. LOAD THE TRAINED MODEL ---
+# load the trained model
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = HeatCNN().to(device)
 
-# --- DATA GENERATION (Quick run to get a single test sample) ---
+# generate a test sample
 grid_size = 64
 num_simulations = 10
 diffusion_coefficient = 0.1
@@ -50,7 +50,7 @@ for t in range(1, time_steps):
     current_state = current_state + dt * (diffusion_coefficient * laplacian)
     all_simulations[:, t, :, :, :] = current_state
 
-# --- QUICK RE-TRAINING TO GET WEIGHTS ---
+# train the model again to get the weights
 from torch.utils.data import Dataset, DataLoader
 class HeatEquationDataset(Dataset):
     def __init__(self, data): self.data = data
@@ -79,15 +79,15 @@ for epoch in range(20):
         optimizer.step()
 print("Done re-training!")
 
-# --- 3. THE ROLLOUT TEST ---
-# We pick simulation #0, starting at time step 0
+# run the rollout test
+# start from simulation 0 at time step 0
 model.eval()
 starting_state = all_simulations[0, 0, :, :, :].unsqueeze(0).to(device)  # Shape: (1, 1, 64, 64)
 
-# Ground Truth (From the physics solver)
+# get the ground truth from the physics solver
 ground_truth_steps = all_simulations[0, :, :, :, :].cpu().numpy()
 
-# CNN Prediction (Auto-regressive)
+# make predictions step by step
 predicted_steps = [starting_state.cpu().numpy()]
 
 current_input = starting_state
@@ -99,11 +99,11 @@ for t in range(1, time_steps):
 
 predicted_steps = np.array(predicted_steps) # Shape: (20, 1, 64, 64)
 
-# --- 4. PLOT THE COMPARISON ---
-# Let's look at the final time step (t=19) to see if the model drifted
+# compare the results
+# look at the final time step to see how much the model drifted
 plt.figure(figsize=(15, 4))
 
-# We use .squeeze() to remove ALL extra dimensions of size 1, ensuring pure (64,64)
+# remove the extra dimensions so the image is (64,64)
 plt.subplot(1, 3, 1)
 plt.imshow(ground_truth_steps[0].squeeze(), cmap='hot')
 plt.title("Ground Truth (t=0)")
@@ -123,7 +123,7 @@ plt.suptitle("Long-term Rollout Test")
 plt.tight_layout()
 plt.show()
 
-# --- 5. CALCULATE ERROR ---
+# calculate the error
 error = np.abs(ground_truth_steps[-1].squeeze() - predicted_steps[-1].squeeze())
 plt.figure(figsize=(6, 5))
 plt.imshow(error, cmap='viridis')
