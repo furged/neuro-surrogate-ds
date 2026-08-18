@@ -3,7 +3,6 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red?logo=pytorch)](https://pytorch.org/)
 [![Status](https://img.shields.io/badge/Status-Prototype-yellow)](https://github.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 > **Warning:** This is an active research prototype. The codebase is intended for experimentation and benchmarking, not for production deployment.
 
