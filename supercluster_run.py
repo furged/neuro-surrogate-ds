@@ -9,18 +9,18 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import os
 
-# --- 1. HPC SETUP ---
+#hpc setup
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"🚀 CONNECTED TO: {torch.cuda.get_device_name(0)}")
 print(f"Total VRAM: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
 
-# --- 2. SUPERCOMPUTER PARAMETERS ---
+#suptercomputer params
 dt = 0.1
 time_steps = 100          # Predict 100 steps deep
 train_sims_per_coeff = 10000  # 10,000 per coefficient = 40,000 total
 test_sims = 500
 
-# --- 3. BATCHED PHYSICS SOLVER ---
+#batched physics solver
 def generate_batch(num_sim, grid_size, diffusion_coeff):
     heat = torch.zeros((num_sim, 1, grid_size, grid_size), device=device)
     for i in range(num_sim):
@@ -39,7 +39,7 @@ def generate_batch(num_sim, grid_size, diffusion_coeff):
         sims[:, t, :, :, :] = state
     return sims
 
-# --- 4. GENERATE MASSIVE DATA ---
+#generate massive data
 print("\n⚙️ Generating 40,000+ simulations on the GPU...")
 train_data_64 = torch.cat([
     generate_batch(train_sims_per_coeff, 64, 0.05),
@@ -51,7 +51,7 @@ train_data_64 = torch.cat([
 test_data_64 = generate_batch(test_sims, 64, 0.25)
 print(f"Train shape: {train_data_64.shape}")
 
-# --- 5. DATASET CLASS ---
+#dataset class
 class HeatDataset(Dataset):
     def __init__(self, data):
         self.data = data
@@ -67,7 +67,7 @@ class HeatDataset(Dataset):
 
 train_loader = DataLoader(HeatDataset(train_data_64), batch_size=128, shuffle=True)
 
-# --- 6. SCALED-UP FNO MODEL ---
+#scaled up fno model
 model = FNO(n_modes=(24, 24), hidden_channels=128, in_channels=1, out_channels=1).to(device)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -90,7 +90,7 @@ for epoch in range(epochs):
         loop.set_postfix(loss=loss.item())
     print(f"Epoch {epoch+1}/{epochs} | Avg Loss: {epoch_loss/len(train_loader):.6f}")
 
-# --- 7. RESOLUTION SCALING TEST ---
+#resolution scaling test
 print("\n🧪 Testing FNO on HIGHER RESOLUTIONS (Zero-shot scaling)...")
 model.eval()
 resolutions = [64, 128, 256, 512]
@@ -112,7 +112,7 @@ for res in resolutions:
     res_errors.append(avg_err)
     print(f"Grid {res}x{res} | MSE: {avg_err:.6f}")
 
-# --- 8. SAVE SCALING RESULTS ---
+#save scaling results
 os.makedirs("results", exist_ok=True)
 plt.figure(figsize=(10,6))
 plt.bar([f"{r}x{r}" for r in resolutions], res_errors, color='blue')
@@ -122,7 +122,7 @@ plt.yscale('log')
 plt.grid(axis='y', linestyle='--')
 plt.savefig("results/super_resolution_scaling.png")
 
-# --- 9. SPEED DEMO (512x512 in milliseconds) ---
+#speed demo (512x512 in milliseconds)
 print("\n⚡ Running final speed demonstration on 512x512 grid...")
 state_512 = generate_batch(1, 512, 0.25)
 start_time = time.time()
@@ -137,10 +137,10 @@ plt.title(f"512x512 Prediction (took {elapsed*1000:.2f} ms)")
 plt.colorbar()
 plt.savefig("results/512_prediction_demo.png")
 
-# Save the model
+#save the model
 torch.save(model.state_dict(), "results/fno_super_model.pth")
 
-print("\n✅ SUPERCOMPUTER RUN COMPLETE!")
+print("\n SUPERCOMPUTER RUN COMPLETE!")
 print("Files saved to 'results/' folder:")
 print("   - super_resolution_scaling.png")
 print("   - 512_prediction_demo.png")
