@@ -40,7 +40,7 @@ def generate_batch(num_sim, grid_size, diffusion_coeff):
     return sims
 
 #generate massive data
-print("\n⚙️ Generating 40,000+ simulations on the GPU...")
+print("\nGenerating 40,000+ simulations on the GPU...")
 train_data_64 = torch.cat([
     generate_batch(train_sims_per_coeff, 64, 0.05),
     generate_batch(train_sims_per_coeff, 64, 0.10),
