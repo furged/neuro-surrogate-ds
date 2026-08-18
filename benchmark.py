@@ -7,7 +7,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
-# --- SETUP ---
+# setup
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Benchmarking on: {device}")
 
@@ -17,7 +17,7 @@ diffusion_coefficient = 0.1
 dt = 0.1
 time_steps = 20
 
-# --- DATA GENERATION ---
+# generate the data
 def generate_data():
     initial_heat = torch.zeros((num_simulations, 1, grid_size, grid_size), device=device)
     for i in range(num_simulations):
@@ -38,7 +38,7 @@ def generate_data():
 
 all_simulations = generate_data()
 
-# --- DATASET ---
+# dataset
 class HeatEquationDataset(Dataset):
     def __init__(self, data):
         self.data = data
@@ -53,7 +53,7 @@ class HeatEquationDataset(Dataset):
 
 dataloader = DataLoader(HeatEquationDataset(all_simulations), batch_size=16, shuffle=True)
 
-# --- MODEL DEFINITIONS ---
+# models
 class HeatCNN(nn.Module):
     def __init__(self):
         super(HeatCNN, self).__init__()
@@ -68,7 +68,7 @@ class HeatCNN(nn.Module):
     def forward(self, x):
         return self.decoder(self.encoder(x))
 
-# --- TRAIN FUNCTION ---
+# train the model
 def train_model(model, name, epochs=20):
     print(f"Training {name} for {epochs} epochs...")
     criterion = nn.MSELoss()
@@ -85,7 +85,7 @@ def train_model(model, name, epochs=20):
     torch.save(model.state_dict(), f"{name}_model.pth")
     return model
 
-# Load or Train CNN
+# load or train the CNN
 cnn = HeatCNN().to(device)
 try:
     cnn.load_state_dict(torch.load("cnn_model.pth", map_location=device))
@@ -93,7 +93,7 @@ try:
 except:
     cnn = train_model(cnn, "cnn", epochs=20)
 
-# Load or Train FNO
+# load or train the FNO
 fno = FNO(n_modes=(16, 16), hidden_channels=32, in_channels=1, out_channels=1).to(device)
 try:
     fno.load_state_dict(torch.load("fno_model.pth", map_location=device))
@@ -101,11 +101,11 @@ try:
 except:
     fno = train_model(fno, "fno", epochs=20)
 
-# --- BENCHMARK 1: SPEED COMPARISON ---
+# compare the speed
 print("\nRunning speed benchmarks...")
 test_input = all_simulations[0, 0, :, :, :].unsqueeze(0).to(device)
 
-# Physics Solver (rolling out 20 steps)
+# physics solver
 start = time.time()
 for _ in range(100):
     state = test_input.clone()
@@ -114,7 +114,7 @@ for _ in range(100):
         state = state + dt * (diffusion_coefficient * lap)
 physics_time = time.time() - start
 
-# CNN (rolling out 20 steps)
+# CNN
 start = time.time()
 for _ in range(100):
     state = test_input.clone()
@@ -122,7 +122,7 @@ for _ in range(100):
         state = cnn(state)
 cnn_time = time.time() - start
 
-# FNO (rolling out 20 steps)
+# FNO
 start = time.time()
 for _ in range(100):
     state = test_input.clone()
@@ -130,7 +130,7 @@ for _ in range(100):
         state = fno(state)
 fno_time = time.time() - start
 
-# Plot Speed
+# plot the speed results
 plt.figure(figsize=(8, 5))
 plt.bar(["Physics Solver", "CNN", "FNO"], [physics_time, cnn_time, fno_time], color=['gray', 'orange', 'blue'])
 plt.ylabel("Time (seconds) for 100 rollouts (20 steps each)")
@@ -139,7 +139,7 @@ plt.grid(axis='y', linestyle='--')
 plt.savefig("results/speed_benchmark.png")
 plt.close()
 
-# --- BENCHMARK 2: ERROR ACCUMULATION OVER TIME ---
+# check how the error builds up
 print("Calculating error accumulation over time...")
 cnn_errors = []
 fno_errors = []
@@ -158,7 +158,7 @@ for t in range(1, time_steps):
     cnn_errors.append(cnn_err)
     fno_errors.append(fno_err)
 
-# Plot Error
+# plot the error
 plt.figure(figsize=(8, 5))
 plt.plot(range(1, time_steps), cnn_errors, label='CNN Error', color='orange', marker='o')
 plt.plot(range(1, time_steps), fno_errors, label='FNO Error', color='blue', marker='s')
