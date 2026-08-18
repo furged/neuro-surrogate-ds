@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 import time
 
-# --- 1. SETUP & DATA GENERATION (Copying our previous code) ---
+# setup and data generation
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
@@ -15,7 +15,7 @@ diffusion_coefficient = 0.1
 dt = 0.1
 time_steps = 20
 
-# Generate data
+# generate the data
 initial_heat = torch.zeros((num_simulations, 1, grid_size, grid_size), device=device)
 for i in range(num_simulations):
     num_spots = torch.randint(1, 4, (1,)).item()
@@ -32,7 +32,7 @@ for t in range(1, time_steps):
     current_state = current_state + dt * (diffusion_coefficient * laplacian)
     all_simulations[:, t, :, :, :] = current_state
 
-# --- 2. DATASET PREP ---
+# prepare the dataset
 class HeatEquationDataset(Dataset):
     def __init__(self, data):
         self.data = data
@@ -48,17 +48,17 @@ class HeatEquationDataset(Dataset):
             y = self.data[sim_idx, t_idx, :, :, :] 
         return x, y
 
-# Create DataLoader
+# create the dataloader
 full_dataset = HeatEquationDataset(all_simulations)
-# We will use a batch size of 16 (you can increase this if your computer handles it)
+# use a batch size of 16
 dataloader = DataLoader(full_dataset, batch_size=16, shuffle=True)
 
-# --- 3. DEFINE THE CNN MODEL ---
+# define the CNN model
 class HeatCNN(nn.Module):
     def __init__(self):
         super(HeatCNN, self).__init__()
         
-        # Encoder (Extract features)
+        # encoder
         self.encoder = nn.Sequential(
             nn.Conv2d(1, 8, kernel_size=3, padding=1),  # 64x64 -> 64x64
             nn.ReLU(),
@@ -66,7 +66,7 @@ class HeatCNN(nn.Module):
             nn.ReLU(),
         )
         
-        # Decoder (Predict the next state)
+        # decoder
         self.decoder = nn.Sequential(
             nn.Conv2d(16, 8, kernel_size=3, padding=1),
             nn.ReLU(),
@@ -78,14 +78,14 @@ class HeatCNN(nn.Module):
         x = self.decoder(x)
         return x
 
-# Initialize the model, loss function, and optimizer
+# initialize the model, loss function, and optimizer
 model = HeatCNN().to(device)
 criterion = nn.MSELoss()  # Mean Squared Error - standard for regression
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 print(f"Model has {sum(p.numel() for p in model.parameters())} parameters")
 
-# --- 4. TRAINING LOOP ---
+# training loop
 num_epochs = 50  # We'll train for 50 rounds
 loss_history = []
 
@@ -96,17 +96,17 @@ for epoch in range(num_epochs):
     epoch_loss = 0.0
     
     for batch_x, batch_y in dataloader:
-        # Move data to GPU/CPU
+        # move the data to the device
         batch_x = batch_x.to(device)
         batch_y = batch_y.to(device)
         
-        # 1. Forward pass: Predict the next heat map
+        # forward pass
         predictions = model(batch_x)
         
-        # 2. Calculate loss (how wrong are we?)
+        # calculate the loss
         loss = criterion(predictions, batch_y)
         
-        # 3. Backward pass: Update the model weights
+        # backward pass and update the weights
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -122,23 +122,23 @@ for epoch in range(num_epochs):
 end_time = time.time()
 print(f"\nTraining finished in {end_time - start_time:.2f} seconds!")
 
-# --- 5. VISUALIZE THE RESULT ---
-# Let's pick one random example from the dataset and see what the model predicts
+# visualize the result
+# pick one example and see what the model predicts
 model.eval()  # Put model in evaluation mode
 with torch.no_grad():
-    # Grab a sample
+    # get a sample
     sample_input, sample_target = full_dataset[0]
     sample_input = sample_input.unsqueeze(0).to(device) # Add batch dimension (1, 1, 64, 64)
     
-    # Predict
+    # make a prediction
     sample_prediction = model(sample_input)
     
-    # Move back to CPU for plotting
+    # move the results back to CPU
     sample_input = sample_input.cpu().squeeze().numpy()
     sample_target = sample_target.cpu().squeeze().numpy()
     sample_prediction = sample_prediction.cpu().squeeze().numpy()
 
-# Plot results
+# plot the results
 plt.figure(figsize=(15, 4))
 
 plt.subplot(1, 3, 1)
@@ -160,7 +160,7 @@ plt.suptitle(f"Final Training Loss: {loss_history[-1]:.6f}")
 plt.tight_layout()
 plt.show()
 
-# Plot the loss over time
+# plot the loss
 plt.figure()
 plt.plot(loss_history)
 plt.xlabel("Epoch")
